@@ -5,7 +5,7 @@ export interface AigcWork {
   images: string[]
   video?: string
   tools: string[]
-  year: number
+  year?: number
 }
 
 export const aigcWorks: AigcWork[] = [
@@ -19,8 +19,7 @@ export const aigcWorks: AigcWork[] = [
       '/showcase/aigc/xbox手柄飞碟电池/广告图.png'
     ],
     video: '/showcase/aigc/xbox手柄飞碟电池/ai飞碟电池视频.mp4',
-    tools: ['ComfyUI', 'Image2', 'Veo3', 'FFmpeg'],
-    year: 2025
+    tools: ['Image2', 'Seedance 2.0', 'FFmpeg']
   },
   {
     id: 'aigc-02',
@@ -31,8 +30,7 @@ export const aigcWorks: AigcWork[] = [
       '/showcase/aigc/北欧风加湿器/场景图.png'
     ],
     video: '/showcase/aigc/北欧风加湿器/北欧加湿器视频.mp4',
-    tools: ['ComfyUI', 'Image2'],
-    year: 2025
+    tools: ['Image2', 'Kelin 3.0']
   },
   {
     id: 'aigc-03',
@@ -44,7 +42,6 @@ export const aigcWorks: AigcWork[] = [
       '/showcase/aigc/极客键盘/场景图2.png'
     ],
     video: '/showcase/aigc/极客键盘/键盘豆包techno).mp4',
-    tools: ['ComfyUI', 'Image2', 'Veo3'],
-    year: 2025
+    tools: ['Image2', 'Seedance 2.0']
   }
 ]

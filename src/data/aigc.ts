@@ -14,7 +14,6 @@ export const aigcWorks: AigcWork[] = [
     title: 'Xbox 手柄飞碟电池充电器',
     description: '赛博朋克风格飞碟造型 Xbox 手柄电池充电器，暗黑炫酷科技风',
     images: [
-      '/showcase/aigc/xbox手柄飞碟电池/产品图.jpg',
       '/showcase/aigc/xbox手柄飞碟电池/场景图.png',
       '/showcase/aigc/xbox手柄飞碟电池/场景图2.png',
       '/showcase/aigc/xbox手柄飞碟电池/广告图.png'

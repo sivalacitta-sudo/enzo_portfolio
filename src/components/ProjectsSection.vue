@@ -112,7 +112,6 @@
             v-else-if="gallery.type === 'video'"
             :src="gallery.src"
             controls
-            autoplay
             class="lightbox-media lightbox-video"
           ></video>
 

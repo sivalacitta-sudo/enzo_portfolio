@@ -34,8 +34,8 @@
 <script setup>
 const skillCategories = [
   {
-    title: '前端开发',
-    skills: ['Vue 3', 'React', 'JavaScript', 'TypeScript', 'HTML5/CSS3', 'Vite']
+    title: 'AIGC',
+    skills: ['Image2 (AI 生图)', 'Veo3 (Google AI 视频)', 'Seedance 2 (字节 AI 视频)', 'ComfyUI (开源工作流)', 'FFmpeg (视频后期)', 'TTS (AI 配音)']
   },
   {
     title: '后端 & AI',

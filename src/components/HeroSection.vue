@@ -12,15 +12,15 @@
           <div class="cli-line">
             <span class="cli-prompt">$ whoami</span>
           </div>
-          <h1 class="typewriter-text">{{ displayedText }}<span class="cursor-blink"></span></h1>
+          <h1 class="hero-name fade-in-name">{{ displayedText }}<span class="cursor-blink"></span></h1>
           <div class="cli-line" style="margin-top: 16px;">
             <span class="cli-prompt">$ cat role.txt</span>
           </div>
-          <p class="subtitle">跨境电商开发者 · 全栈工程师 · AI Agent 构建者</p>
+          <p class="subtitle">跨境电商开发者 · 设计师 · AI Agent 构建者</p>
           <div class="cli-line" style="margin-top: 16px;">
             <span class="cli-prompt">$ echo $MISSION</span>
           </div>
-          <p class="mission">用代码和数据驱动电商增长，从设计到部署全流程自动化</p>
+          <p class="mission">用 AI 工作流重构视觉创作，从设计、生成到自动化交付全流程提效</p>
         </div>
       </div>
     </div>
@@ -30,21 +30,14 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-const fullText = 'ENZO MANGIA BENE'
+const fullText = '程石'
 const displayedText = ref('')
-const typingSpeed = 100
 
 onMounted(() => {
-  let index = 0
-  const typeWriter = () => {
-    if (index < fullText.length) {
-      displayedText.value += fullText.charAt(index)
-      index++
-      setTimeout(typeWriter, typingSpeed)
-    }
-  }
-  
-  setTimeout(typeWriter, 500)
+  // 短文本直接淡入，不做逐字打字
+  setTimeout(() => {
+    displayedText.value = fullText
+  }, 300)
 })
 </script>
 
@@ -67,12 +60,21 @@ onMounted(() => {
   margin-bottom: 8px;
 }
 
-.typewriter-text {
+.hero-name {
   font-family: var(--font-mono);
   font-size: 48px;
   color: var(--accent);
   margin: 16px 0;
   min-height: 60px;
+}
+
+.fade-in-name {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .subtitle {
@@ -93,7 +95,7 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .typewriter-text {
+  .hero-name {
     font-size: 32px;
   }
   

@@ -10,18 +10,26 @@ export interface AgentProject {
 export const agents: AgentProject[] = [
   {
     id: 'agent-01',
-    title: '跨境电商智能客服 Agent',
-    description: '基于 LangChain + RAG 的多平台智能客服系统，支持 Amazon/Temu/TikTok Shop 工单自动处理',
-    cover: '/showcase/agents/agent-01.svg',
-    tags: ['LangChain', 'RAG', 'Python', '向量数据库'],
-    url: ''
+    title: 'Multi-Agent 协作工作台',
+    description: '7 个专业智能体实时协同工作，共同打造电影级视频产出',
+    cover: '/showcase/agents/agent-01.png',
+    tags: ['LangGraph', 'Multi-Agent', '视频生成'],
+    url: 'https://huggingface.co/spaces/enzomangia/aigc-video-multi-agent'
   },
   {
     id: 'agent-02',
-    title: 'AIGC 工作流编排 Agent',
-    description: '多模型串联的视觉内容自动化生产 Agent，从 prompt 管理到成品交付全链路',
-    cover: '/showcase/agents/agent-02.svg',
-    tags: ['ComfyUI', 'API 编排', '工作流引擎'],
-    url: ''
+    title: '达人建联 Agent',
+    description: 'AI 驱动的 LangGraph 达人建联工作流 Demo：parse brief → retrieve creators → score/rerank → HITL 审核 → 文案生成 → 审核发送',
+    cover: '/showcase/agents/agent-02.png',
+    tags: ['LangGraph', 'RAG', 'HITL', '工作流'],
+    url: 'https://huggingface.co/spaces/enzomangia/creator-outreach-agent-mvp'
+  },
+  {
+    id: 'agent-03',
+    title: '短视频自动剪辑 Agent',
+    description: '商品短视频自动化粗剪 Agent：Brief、脚本、素材标签、EDL、FFmpeg 粗剪、发布包，一条链路跑到底',
+    cover: '/showcase/agents/agent-03.jpg',
+    tags: ['LangGraph', 'FFmpeg', 'EDL', '自动化'],
+    url: 'https://huggingface.co/spaces/enzomangia/shortreel-graph-mvp'
   }
 ]

@@ -73,35 +73,15 @@
               v-for="work in filteredWorks"
               :key="work.id"
               class="gallery-card terminal-window"
-              :class="{ degraded: isDegraded(work) }"
-              @click="handleCardClick(work)"
+              @click="openGallery(work)"
             >
               <div class="gallery-media">
-                <!-- 视频卡片 -->
-                <template v-if="work.type === 'video'">
-                  <img :src="work.poster" :alt="work.title" class="gallery-img" />
-                  <div class="video-overlay">
-                    <span v-if="work.src" class="play-icon">▶</span>
-                    <span v-else class="placeholder-text">素材待补充</span>
-                  </div>
-                  <video
-                    v-if="work.src"
-                    :src="work.src"
-                    :poster="work.poster"
-                    muted
-                    autoplay
-                    loop
-                    playsinline
-                    class="gallery-video"
-                    @mouseenter="addControls($event)"
-                    @mouseleave="removeControls($event)"
-                  ></video>
-                </template>
-                <!-- 图片卡片 -->
-                <img v-else :src="work.src" :alt="work.title" class="gallery-img" />
+                <img :src="work.images[0]" :alt="work.title" class="gallery-img" />
+                <div v-if="work.video" class="video-badge">▶ 视频</div>
               </div>
               <div class="gallery-info">
                 <h4 class="gallery-title">{{ work.title }}</h4>
+                <p class="gallery-desc">{{ work.description }}</p>
                 <div class="gallery-meta">
                   <span v-for="tool in work.tools" :key="tool" class="gallery-tag">{{ tool }}</span>
                   <span class="gallery-year">{{ work.year }}</span>
@@ -113,19 +93,42 @@
       </div>
     </div>
 
-    <!-- Lightbox -->
+    <!-- 画廊 Lightbox -->
     <Teleport to="body">
-      <div v-if="lightbox" class="lightbox-overlay" @click="closeLightbox">
+      <div v-if="gallery" class="lightbox-overlay" @click="closeGallery">
         <div class="lightbox-content" @click.stop>
-          <button class="lightbox-close" @click="closeLightbox">✕</button>
-          <img v-if="lightbox.type === 'image'" :src="lightbox.src" alt="作品大图" />
+          <button class="lightbox-close" @click="closeGallery">✕</button>
+
+          <!-- 图片 -->
+          <img
+            v-if="gallery.type === 'image'"
+            :src="gallery.src"
+            :alt="gallery.title"
+            class="lightbox-media"
+          />
+
+          <!-- 视频 -->
           <video
-            v-else
-            :src="lightbox.src"
+            v-else-if="gallery.type === 'video'"
+            :src="gallery.src"
             controls
             autoplay
-            class="lightbox-video"
+            class="lightbox-media lightbox-video"
           ></video>
+
+          <!-- 导航 -->
+          <button
+            v-if="gallery.index > 0"
+            class="gallery-nav prev"
+            @click="navigate(-1)"
+          >‹</button>
+          <button
+            v-if="gallery.index < gallery.total - 1"
+            class="gallery-nav next"
+            @click="navigate(1)"
+          >›</button>
+
+          <div class="gallery-counter">{{ gallery.index + 1 }} / {{ gallery.total }}</div>
         </div>
       </div>
     </Teleport>
@@ -139,7 +142,6 @@ import type { AigcWork } from '../data/aigc'
 import { aigcWorks } from '../data/aigc'
 
 const activeFilter = ref('all')
-const lightbox = ref<{ type: 'image' | 'video'; src: string } | null>(null)
 
 const filterTabs = [
   { key: 'all', label: '全部' },
@@ -149,32 +151,61 @@ const filterTabs = [
 
 const filteredWorks = computed(() => {
   if (activeFilter.value === 'all') return aigcWorks
-  return aigcWorks.filter((w) => w.type === activeFilter.value)
+  if (activeFilter.value === 'image') return aigcWorks.filter((w) => w.images.length > 0)
+  if (activeFilter.value === 'video') return aigcWorks.filter((w) => !!w.video)
+  return aigcWorks
 })
 
-function isDegraded(work: AigcWork) {
-  return work.type === 'video' && !work.src
+interface GalleryState {
+  work: AigcWork
+  type: 'image' | 'video'
+  src: string
+  title: string
+  index: number
+  total: number
 }
 
-function handleCardClick(work: AigcWork) {
-  if (isDegraded(work)) return
-  if (work.type === 'image' && work.src) {
-    lightbox.value = { type: 'image', src: work.src }
-  } else if (work.type === 'video' && work.src) {
-    lightbox.value = { type: 'video', src: work.src }
+const gallery = ref<GalleryState | null>(null)
+
+function buildMediaList(work: AigcWork): { type: 'image' | 'video'; src: string }[] {
+  const list: { type: 'image' | 'video'; src: string }[] = []
+  work.images.forEach((img) => list.push({ type: 'image', src: img }))
+  if (work.video) list.push({ type: 'video', src: work.video })
+  return list
+}
+
+function openGallery(work: AigcWork) {
+  const media = buildMediaList(work)
+  if (media.length === 0) return
+
+  const first = media[0]
+  gallery.value = {
+    work,
+    type: first.type,
+    src: first.src,
+    title: work.title,
+    index: 0,
+    total: media.length
   }
 }
 
-function closeLightbox() {
-  lightbox.value = null
+function closeGallery() {
+  gallery.value = null
 }
 
-function addControls(e: Event) {
-  ;(e.target as HTMLVideoElement).setAttribute('controls', '')
-}
+function navigate(dir: number) {
+  if (!gallery.value) return
+  const media = buildMediaList(gallery.value.work)
+  const newIndex = gallery.value.index + dir
+  if (newIndex < 0 || newIndex >= media.length) return
 
-function removeControls(e: Event) {
-  ;(e.target as HTMLVideoElement).removeAttribute('controls')
+  const item = media[newIndex]
+  gallery.value = {
+    ...gallery.value,
+    type: item.type,
+    src: item.src,
+    index: newIndex
+  }
 }
 </script>
 
@@ -306,13 +337,6 @@ function removeControls(e: Event) {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
-  opacity: 1;
-  transition: opacity 0.2s ease;
-}
-
-/* 过渡时闪一下 */
-.gallery-grid:not([key]) {
-  opacity: 0.6;
 }
 
 @media (max-width: 1279px) and (min-width: 1024px) {
@@ -331,12 +355,6 @@ function removeControls(e: Event) {
   cursor: pointer;
 }
 
-.gallery-card.degraded {
-  opacity: 0.5;
-  cursor: default;
-  filter: grayscale(0.4);
-}
-
 .gallery-media {
   position: relative;
   width: 100%;
@@ -353,58 +371,41 @@ function removeControls(e: Event) {
   transition: transform 0.3s ease;
 }
 
-.gallery-card:not(.degraded):hover .gallery-img {
+.gallery-card:hover .gallery-img {
   transform: scale(1.03);
 }
 
-.gallery-video {
+.video-badge {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: none;
-}
-
-.gallery-card:hover .gallery-video {
-  display: block;
-}
-
-.video-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 8px;
+  right: 8px;
+  padding: 4px 10px;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 11px;
   pointer-events: none;
   z-index: 2;
 }
 
-.play-icon {
-  font-size: 36px;
-  color: var(--accent);
-  text-shadow: 0 0 12px rgba(88, 166, 255, 0.6);
-}
-
-.placeholder-text {
-  font-family: var(--font-mono);
-  font-size: 13px;
-  color: var(--text-secondary);
-  background: rgba(0, 0, 0, 0.75);
-  padding: 6px 14px;
-  border-radius: 4px;
-  border: 1px solid var(--border);
-}
-
 .gallery-info {
-  padding: 12px 16px;
+  padding: 14px 16px;
 }
 
 .gallery-title {
   font-size: 15px;
   color: var(--text-primary);
   font-family: var(--font-mono);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
+}
+
+.gallery-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 10px;
 }
 
 .gallery-meta {
@@ -431,11 +432,11 @@ function removeControls(e: Event) {
   margin-left: auto;
 }
 
-/* ── Lightbox ── */
+/* ── Lightbox 画廊 ── */
 .lightbox-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.88);
+  background: rgba(0, 0, 0, 0.9);
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -446,35 +447,85 @@ function removeControls(e: Event) {
 .lightbox-content {
   position: relative;
   cursor: default;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.lightbox-content img,
-.lightbox-video {
+.lightbox-media {
   max-width: 90vw;
-  max-height: 90vh;
+  max-height: 85vh;
   object-fit: contain;
   border: 1px solid var(--border);
   border-radius: 4px;
 }
 
+.lightbox-video {
+  width: 90vw;
+  max-width: 1280px;
+}
+
 .lightbox-close {
   position: absolute;
-  top: -40px;
+  top: -44px;
   right: 0;
   background: none;
   border: none;
   color: var(--text-secondary);
-  font-size: 28px;
+  font-size: 30px;
   cursor: pointer;
   font-family: var(--font-mono);
   transition: color 0.2s;
+  z-index: 1;
 }
 
 .lightbox-close:hover {
   color: #ff5f56;
 }
 
-/* ── 响应式 ── */
+.gallery-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 36px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  z-index: 2;
+}
+
+.gallery-nav:hover {
+  background: rgba(88, 166, 255, 0.3);
+  border-color: var(--accent);
+}
+
+.gallery-nav.prev {
+  left: -60px;
+}
+
+.gallery-nav.next {
+  right: -60px;
+}
+
+.gallery-counter {
+  position: absolute;
+  bottom: -36px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
 @media (max-width: 768px) {
   .projects-section {
     padding: 60px 16px;
@@ -491,6 +542,18 @@ function removeControls(e: Event) {
   .filter-tab {
     padding: 6px 14px;
     font-size: 12px;
+  }
+
+  .gallery-nav.prev {
+    left: 8px;
+  }
+
+  .gallery-nav.next {
+    right: 8px;
+  }
+
+  .lightbox-video {
+    width: 96vw;
   }
 }
 </style>

@@ -41,8 +41,7 @@
               <span class="cli-prompt">$ echo $PHILOSOPHY</span>
             </div>
             <p class="philosophy-text">
-              "从设计到代码，从运营到自动化，我相信<strong>全流程掌控力</strong>才是核心竞争力。
-              每一个环节都可以用数据和算法优化，每一次迭代都让系统更智能。"
+              "从设计审美到 AI 生成，从电商运营到 Agent 自动化，我相信真正的竞争力来自跨领域的整合能力。每一次创作都可以被工作流优化，每一个项目都可以被 AI 放大。"
             </p>
           </div>
         </div>
@@ -54,28 +53,28 @@
 <script setup>
 const careerPhases = [
   {
-    title: '设计阶段 (2018-2020)',
-    description: '从平面到室内再到产品设计，建立了扎实的美学基础和空间思维能力',
-    tags: ['平面设计', '室内设计', '产品设计', 'AutoCAD', 'Photoshop']
+    title: '设计阶段 (2020-2024)',
+    description: '从平面到室内再到产品设计，建立扎实的美学基础和空间思维',
+    tags: ['平面设计', '室内设计', '产品设计', 'AutoCAD', 'Photoshop', 'Figma']
   },
   {
-    title: '电商探索 (2020-2022)',
-    description: '深入 Temu 和 TikTok 平台，掌握短视频内容创作、投流策略和全流程运营',
-    tags: ['Temu 运营', 'TikTok Shop', '短视频编剧', '拍摄剪辑', '投流优化']
+    title: '电商探索 (2024-2026)',
+    description: '深入 Temu 与 TikTok Shop，短视频内容创作、投流策略、全流程运营',
+    tags: ['Temu', 'TikTok Shop', '短视频编剧', '拍摄剪辑', '投流优化']
   },
   {
-    title: '数据驱动 (2022-2023)',
-    description: '转向跨境电商数据分析，开发自动化工具提升运营效率，开始接触编程',
-    tags: ['数据分析', '产品开发', 'Python', 'Excel 自动化', 'ACoS 优化']
+    title: '数据驱动 (2024-2026)',
+    description: '跨境电商数据分析，开发自动化工具提升运营效率',
+    tags: ['数据分析', 'Python', 'Excel 自动化', 'ACoS 优化']
   },
   {
-    title: '全栈开发 (2023-2024)',
-    description: '系统学习前端和后端技术，构建电商平台和自动化工具，实现技术转型',
-    tags: ['Vue 3', 'React', 'Node.js', 'MongoDB', 'Vite']
+    title: 'AIGC (2024-2026)',
+    description: 'AI 生图生视频工作流，作品级视觉产出',
+    tags: ['ComfyUI', 'Veo3', 'Seedance', 'Image2', 'FFmpeg', 'TTS']
   },
   {
     title: 'AI Agent 时代 (2024-至今)',
-    description: '专注 LangChain + RAG 架构，开发企业级 AI Agent，成为 AI 产品经理',
+    description: 'LangChain + RAG，企业级 Agent，AI 产品经理',
     tags: ['LangChain', 'RAG', 'Agent 开发', '大模型应用', 'AI 产品']
   }
 ]

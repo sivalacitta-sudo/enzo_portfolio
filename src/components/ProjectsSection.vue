@@ -68,38 +68,88 @@
             >{{ tab.label }}</button>
           </div>
 
-          <div class="gallery-grid" :key="activeFilter">
-            <div
-              v-for="work in filteredWorks"
-              :key="work.id"
-              class="gallery-card terminal-window"
-              @click="openGallery(work)"
-            >
-              <div class="gallery-media">
-                <img :src="work.images[0]" :alt="work.title" class="gallery-img" />
-                <div v-if="work.video" class="video-badge">▶ 视频</div>
-              </div>
-              <div class="gallery-info">
-                <h4 class="gallery-title">{{ work.title }}</h4>
-                <p class="gallery-desc">{{ work.description }}</p>
-                <div class="gallery-meta">
-                  <span v-for="tool in work.tools" :key="tool" class="gallery-tag">{{ tool }}</span>
-                  <span class="gallery-year">{{ work.year }}</span>
+          <Transition name="grid-fade">
+            <div class="gallery-grid" :key="activeFilter">
+              <!-- 模式 A："全部" — 已有逻辑：首图 + 视频角标 -->
+              <template v-if="activeFilter === 'all'">
+                <div
+                  v-for="work in filteredWorks"
+                  :key="work.id"
+                  class="gallery-card terminal-window"
+                  @click="openGallery(work)"
+                >
+                  <div class="gallery-media">
+                    <img :src="work.images[0]" :alt="work.title" class="gallery-img" />
+                    <div v-if="work.video" class="video-badge">▶ 视频</div>
+                  </div>
+                  <div class="gallery-info">
+                    <h4 class="gallery-title">{{ work.title }}</h4>
+                    <p class="gallery-desc">{{ work.description }}</p>
+                    <div class="gallery-meta">
+                      <span v-for="tool in work.tools" :key="tool" class="gallery-tag">{{ tool }}</span>
+                      <span class="gallery-year">{{ work.year }}</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </template>
+
+              <!-- 模式 B："图片" — 只展示图片卡片 -->
+              <template v-if="activeFilter === 'image'">
+                <template v-for="work in filteredWorks" :key="work.id">
+                  <div
+                    v-for="(imgSrc, imgIdx) in work.images"
+                    :key="work.id + '-img-' + imgIdx"
+                    class="gallery-card terminal-window"
+                    @click="openSingle('image', imgSrc, work.title)"
+                  >
+                    <div class="gallery-media">
+                      <img :src="imgSrc" :alt="work.title + ' ' + (imgIdx + 1)" class="gallery-img" />
+                    </div>
+                    <div class="gallery-info">
+                      <h4 class="gallery-title">{{ work.title }} {{ imgIdx + 1 }}</h4>
+                      <div class="gallery-meta">
+                        <span v-for="tool in work.tools" :key="tool" class="gallery-tag">{{ tool }}</span>
+                        <span class="gallery-year">{{ work.year }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </template>
+
+              <!-- 模式 C："视频" — 只展示视频卡片 -->
+              <template v-if="activeFilter === 'video'">
+                <div
+                  v-for="work in filteredWorks"
+                  :key="work.id"
+                  class="gallery-card terminal-window"
+                  @click="openSingle('video', work.video!, work.title)"
+                >
+                  <div class="gallery-media">
+                    <img :src="work.images[0]" :alt="work.title" class="gallery-img" />
+                    <div class="video-badge">▶ 播放</div>
+                  </div>
+                  <div class="gallery-info">
+                    <h4 class="gallery-title">{{ work.title }}</h4>
+                    <p class="gallery-desc">{{ work.description }}</p>
+                    <div class="gallery-meta">
+                      <span v-for="tool in work.tools" :key="tool" class="gallery-tag">{{ tool }}</span>
+                      <span class="gallery-year">{{ work.year }}</span>
+                    </div>
+                  </div>
+                </div>
+              </template>
             </div>
-          </div>
+          </Transition>
         </div>
       </div>
     </div>
 
-    <!-- 画廊 Lightbox -->
+    <!-- Lightbox -->
     <Teleport to="body">
       <div v-if="gallery" class="lightbox-overlay" @click="closeGallery">
         <div class="lightbox-content" @click.stop>
           <button class="lightbox-close" @click="closeGallery">✕</button>
 
-          <!-- 图片 -->
           <img
             v-if="gallery.type === 'image'"
             :src="gallery.src"
@@ -107,27 +157,28 @@
             class="lightbox-media"
           />
 
-          <!-- 视频 -->
           <video
             v-else-if="gallery.type === 'video'"
+            :key="'vid-' + gallery.index"
             :src="gallery.src"
             controls
+            playsinline
+            preload="auto"
             class="lightbox-media lightbox-video"
           ></video>
 
-          <!-- 导航 -->
           <button
-            v-if="gallery.index > 0"
+            v-if="gallery.total > 1 && gallery.index > 0"
             class="gallery-nav prev"
             @click="navigate(-1)"
           >‹</button>
           <button
-            v-if="gallery.index < gallery.total - 1"
+            v-if="gallery.total > 1 && gallery.index < gallery.total - 1"
             class="gallery-nav next"
             @click="navigate(1)"
           >›</button>
 
-          <div class="gallery-counter">{{ gallery.index + 1 }} / {{ gallery.total }}</div>
+          <div v-if="gallery.total > 1" class="gallery-counter">{{ gallery.index + 1 }} / {{ gallery.total }}</div>
         </div>
       </div>
     </Teleport>
@@ -156,35 +207,51 @@ const filteredWorks = computed(() => {
 })
 
 interface GalleryState {
-  work: AigcWork
   type: 'image' | 'video'
   src: string
   title: string
   index: number
   total: number
+  mediaList: { type: 'image' | 'video'; src: string }[]
 }
 
 const gallery = ref<GalleryState | null>(null)
 
-function buildMediaList(work: AigcWork): { type: 'image' | 'video'; src: string }[] {
+function buildMediaList(work: AigcWork, filter: string): { type: 'image' | 'video'; src: string }[] {
   const list: { type: 'image' | 'video'; src: string }[] = []
-  work.images.forEach((img) => list.push({ type: 'image', src: img }))
-  if (work.video) list.push({ type: 'video', src: work.video })
+  if (filter === 'all' || filter === 'image') {
+    work.images.forEach((img) => list.push({ type: 'image', src: img }))
+  }
+  if (filter === 'all' || filter === 'video') {
+    if (work.video) list.push({ type: 'video', src: work.video })
+  }
   return list
 }
 
 function openGallery(work: AigcWork) {
-  const media = buildMediaList(work)
+  const media = buildMediaList(work, activeFilter.value)
   if (media.length === 0) return
 
-  const first = media[0]
   gallery.value = {
-    work,
-    type: first.type,
-    src: first.src,
+    type: media[0].type,
+    src: media[0].src,
     title: work.title,
     index: 0,
-    total: media.length
+    total: media.length,
+    mediaList: media
+  }
+}
+
+/** 单图/单视频快速预览 */
+function openSingle(type: 'image' | 'video', src: string, title: string) {
+  const list = [{ type, src }]
+  gallery.value = {
+    type,
+    src,
+    title,
+    index: 0,
+    total: 1,
+    mediaList: list
   }
 }
 
@@ -194,11 +261,10 @@ function closeGallery() {
 
 function navigate(dir: number) {
   if (!gallery.value) return
-  const media = buildMediaList(gallery.value.work)
   const newIndex = gallery.value.index + dir
-  if (newIndex < 0 || newIndex >= media.length) return
+  if (newIndex < 0 || newIndex >= gallery.value.total) return
 
-  const item = media[newIndex]
+  const item = gallery.value.mediaList[newIndex]
   gallery.value = {
     ...gallery.value,
     type: item.type,
@@ -329,6 +395,16 @@ function navigate(dir: number) {
   background: rgba(88, 166, 255, 0.12);
   border-color: var(--accent);
   color: var(--accent);
+}
+
+/* ── Grid fade ── */
+.grid-fade-enter-active,
+.grid-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.grid-fade-enter-from,
+.grid-fade-leave-to {
+  opacity: 0;
 }
 
 /* ── AIGC 作品网格 ── */
@@ -525,6 +601,7 @@ function navigate(dir: number) {
   font-size: 13px;
 }
 
+/* ── 响应式 ── */
 @media (max-width: 768px) {
   .projects-section {
     padding: 60px 16px;
